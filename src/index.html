@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Raddaran Paper Repository - A platform for managing and sharing academic papers across multiple disciplines">
+    <meta name="keywords" content="academic papers, research papers, paper repository, academic repository">
+    <meta name="author" content="Raddaran">
+    <meta name="theme-color" content="#2c3e50">
+    <meta property="og:title" content="Raddaran Paper Repository">
+    <meta property="og:description" content="Manage and share academic papers across multiple disciplines">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://raddaran-paper.com">
+    
+    <title>Raddaran Paper Repository</title>
+    <link rel="stylesheet" href="/src/css/style.css">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://api.raddaran-paper.com">
+</head>
+<body role="application">
+    <div class="container">
+        <header role="banner">
+            <h1>Raddaran Paper Repository</h1>
+            <form role="search" class="search-bar" onsubmit="event.preventDefault(); handleSearch();">
+                <label for="searchInput" class="visually-hidden">Search papers</label>
+                <input type="search" 
+                       id="searchInput" 
+                       placeholder="Search papers..." 
+                       aria-label="Search papers"
+                       autocomplete="off">
+                <button type="submit" id="searchBtn" aria-label="Search">
+                    Search
+                </button>
+            </form>
+        </header>
+
+        <main role="main">
+            <aside class="sidebar" role="complementary">
+                <nav aria-labelledby="categories-heading">
+                    <h2 id="categories-heading">Categories</h2>
+                    <ul id="categories" role="list">
+                        <li role="listitem" tabindex="0">Computer Science</li>
+                        <li role="listitem" tabindex="0">Mathematics</li>
+                        <li role="listitem" tabindex="0">Physics</li>
+                        <li role="listitem" tabindex="0">Engineering</li>
+                    </ul>
+                </nav>
+                <div class="button-container">
+                    <button id="uploadBtn" class="primary-btn" aria-label="Upload new paper">
+                        Upload Paper
+                    </button>
+                    <button id="generateBtn" class="secondary-btn" aria-label="Generate new paper">
+                        Generate Paper
+                    </button>
+                </div>
+            </aside>
+
+            <div class="content" role="region" aria-label="Paper list">
+                <div class="filters">
+                    <label for="sortBy" class="visually-hidden">Sort papers by</label>
+                    <select id="sortBy" aria-label="Sort papers by">
+                        <option value="date">Date Added</option>
+                        <option value="title">Title</option>
+                        <option value="author">Author</option>
+                    </select>
+                </div>
+                
+                <div id="papers" 
+                     class="papers-grid" 
+                     role="list" 
+                     aria-live="polite" 
+                     aria-label="List of papers">
+                    <!-- Papers will be dynamically populated -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Upload Modal -->
+        <div id="uploadModal" 
+             class="modal" 
+             role="dialog" 
+             aria-labelledby="uploadTitle" 
+             aria-modal="true"
+             aria-hidden="true">
+            <div class="modal-content">
+                <h2 id="uploadTitle">Upload Paper</h2>
+                <form id="uploadForm" novalidate>
+                    <div class="form-group">
+                        <label for="uploadTitle">Paper Title</label>
+                        <input type="text" 
+                               id="uploadTitle" 
+                               name="title" 
+                               required 
+                               aria-required="true">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="uploadAuthor">Author(s)</label>
+                        <input type="text" 
+                               id="uploadAuthor" 
+                               name="author" 
+                               required 
+                               aria-required="true">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="uploadCategory">Category</label>
+                        <select id="uploadCategory" 
+                                name="category" 
+                                required 
+                                aria-required="true">
+                        <option value="">Select Category</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Engineering">Engineering</option>
+                    </select>
+                    <div class="form-group">
+                        <label for="uploadFile">Paper File (PDF, DOC, DOCX)</label>
+                        <input type="file" 
+                               id="uploadFile" 
+                               name="file" 
+                               accept=".pdf,.doc,.docx" 
+                               required 
+                               aria-required="true">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="uploadDescription">Abstract or Description</label>
+                        <textarea id="uploadDescription" 
+                                  name="description" 
+                                  rows="4"></textarea>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" 
+                                class="cancel-btn" 
+                                aria-label="Cancel upload">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="submit-btn" 
+                                aria-label="Upload paper">
+                            Upload
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <h2>Edit Paper</h2>
+                <form id="editForm">
+                    <input type="hidden" name="paperId">
+                    <input type="text" name="title" placeholder="Paper Title" required>
+                    <input type="text" name="author" placeholder="Author(s)" required>
+                    <select name="category" required>
+                        <option value="">Select Category</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Engineering">Engineering</option>
+                    </select>
+                    <textarea name="description" placeholder="Abstract or Description"></textarea>
+                    <div class="button-group">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="submit-btn">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Generate Paper Modal -->
+        <div id="generateModal" class="modal">
+            <div class="modal-content">
+                <h2>Generate Paper</h2>
+                <form id="generateForm">
+                    <select name="template" required>
+                        <option value="">Select Template</option>
+                        <option value="research">Research Paper</option>
+                        <option value="review">Literature Review</option>
+                        <option value="technical">Technical Report</option>
+                    </select>
+                    <input type="text" name="title" placeholder="Paper Title" required>
+                    <input type="text" name="author" placeholder="Author(s)" required>
+                    <select name="category" required>
+                        <option value="">Select Category</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Physics">Physics</option>
+                        <option value="Engineering">Engineering</option>
+                    </select>
+                    <textarea name="abstract" placeholder="Abstract" required></textarea>
+                    <textarea name="introduction" placeholder="Introduction"></textarea>
+                    <textarea name="methodology" placeholder="Methodology"></textarea>
+                    <textarea name="results" placeholder="Results/Analysis"></textarea>
+                    <textarea name="discussion" placeholder="Discussion"></textarea>
+                    <textarea name="conclusion" placeholder="Conclusion"></textarea>
+                    <textarea name="references" placeholder="References"></textarea>
+                    <div class="button-group">
+                        <button type="button" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="submit-btn">Generate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="/src/js/app.js"></script>
+</body>
+</html>
